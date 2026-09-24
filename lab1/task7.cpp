@@ -9,13 +9,9 @@ using namespace std;
 
 /*
 EVP_CIPHER_CTX_new()：创建上下文。
-
 EVP_EncryptInit_ex()：初始化，指定算法（如 EVP_aes_128_cbc()）、密钥和 IV。
-
-EVP_EncryptUpdate()：传入明文，获取密文（可多次调用处理大数据）。
-
+EVP_EncryptUpdate()：传入明文，获取密文。
 EVP_EncryptFinal_ex()：处理最后的填充块。
-
 EVP_CIPHER_CTX_free()：释放上下文。
 */
 
@@ -23,23 +19,41 @@ bool aes_decrypt_128_cbc(const vector <unsigned char>& ciphertext,
                                    const vector <unsigned char> &key,
                                    const vector <unsigned char> &iv,
                                    vector <unsigned char> &out_plaintext){
-    // 创建上下文
+    
+    /*
+    创建上下文
+    EVP_CIPHER和EVP_CIPHER_CTX是EVP加密算法的两个基本结构体，分别用于表示加密算法信息和维护加密过程的上下文
+    其中前者是后者的成员之一
+    */
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-    // 初始化 
+    /*
+    初始化上下文
+    将参数列表中的加密算法类型、密钥、初始向量保存在上下文ctx中
+    */ 
     EVP_DecryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, key.data(), iv.data());
 
     vector <unsigned char> plaintext(ciphertext.size());
     int len = 0, plaintext_len = 0;
-
+    /*
+    解密
+    取ciphertext.data()中指定尺寸(ciphertext.size())的数据
+    将其解密并保存在plaintext.data()中, 实际解密后的数据的长度保存在len中
+    (不会处理最后的填充块)
+    */
     EVP_DecryptUpdate(ctx, plaintext.data(), &len, ciphertext.data(), ciphertext.size());
     plaintext_len = len;
+
+    /*
+    处理最后的填充块
+    将剩余的填充块解密并保存在plaintext.data()中, 实际解密后的数据的长度保存在len中
+    */
     EVP_DecryptFinal_ex(ctx, plaintext.data() + len, &len);
     plaintext_len += len;
     
     
     plaintext.resize(plaintext_len);
     out_plaintext = move(plaintext);
-    
+    //释放上下文
     EVP_CIPHER_CTX_free(ctx);
     return true;
 }
