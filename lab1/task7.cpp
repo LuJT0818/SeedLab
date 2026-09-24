@@ -60,8 +60,11 @@ bool aes_decrypt_128_cbc(const vector <unsigned char>& ciphertext,
 
 vector <unsigned char> hex_to_bytes(const string& hex){
     vector <unsigned char> out;
+    // 提前分配内存 2位十六进制码表示一个字节
     out.reserve(hex.size() / 2); 
-    auto nibble = [](char c) -> int{ 
+
+    auto nibble = [](char c) -> int{
+        // 定义一个局部匿名函数并赋值给变量，相当于int nibble(char c)
         if (c >= '0' && c <= '9') return c - '0';
         if (c >= 'a' && c <= 'f') return c - 'a' + 10;
         return -1;
@@ -75,44 +78,45 @@ vector <unsigned char> hex_to_bytes(const string& hex){
 }
 bool make_key(const string &word, vector <unsigned char> &key){
     key.assign(word.begin(), word.end());
-    key.resize(16, static_cast<unsigned char>('#'));
+    key.resize(16, (unsigned char)('#'));
     return true;
 }
-
+/*
+编译 g++ task7.cpp -o task7 -lcrypto
+运行 ./task7
+*/
 int main(){
+    // 明文、密文、IV
     string known_plaintext = "This is a top secret.";
     string ciphertext_hex = "764aa26b55a4da654df6b19e4bce00f4ed05e09346fb0e762583cb7da2ac93a2";
     string iv_hex = "aabbccddeeff00998877665544332211";
-
+    // 将字符串转换成字节数据数组
     vector <unsigned char> ciphertext = hex_to_bytes(ciphertext_hex);
     vector <unsigned char> iv = hex_to_bytes(iv_hex);
-
+    // 读英文词典文件
     string dict_path = "Labsetup/Files/words.txt";
     ifstream dict(dict_path);
 
     string word;
     int cnt = 0;
+    // 按行读取 遍历词典
     while(getline(dict, word)){
+        // 记录密钥序号
         cnt++;
-        while(!word.empty() && (word.back() == '\r' || word.back() == '\n' ||
-                                 word.back() == ' '  || word.back() == '\t')){ 
-            word.pop_back();            
-        }
-    
+        // 生成密钥（填充'#'至指定长度）
         vector <unsigned char> key;
         make_key(word, key);
+        // 利用密钥解密，比较解密结果
         vector <unsigned char> plaintext;
         if(aes_decrypt_128_cbc(ciphertext, key, iv, plaintext)){ 
             string pt(plaintext.begin(), plaintext.end());
-            // 解密结果含 PKCS#7 填充，只比较前 strlen(known_plaintext) 个字节
-            if (pt.size() >= known_plaintext.size() &&
-                pt.compare(0, known_plaintext.size(), known_plaintext) == 0){
-                cout << cnt << ": Found key: " << word << endl;
+
+            if (pt == known_plaintext){
+                cout << "Found key: " << cnt << ' ' << word << endl;
                 return 0;
             }
         }
     }
     cout << cnt << ": Key not found" << endl;
     return 0;
-    // change again
 }
