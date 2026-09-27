@@ -14,4 +14,4 @@ openssl enc -aes-128-cbc -d \
         -K 00112233445566778999aabbccddeeff \
         -iv 0102030405060708090a0b0c0d0e0f10
 
-vim task5_plain.txt
+cat task5_plain.txt

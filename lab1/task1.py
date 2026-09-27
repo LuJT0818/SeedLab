@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import re
 from collections import Counter
 
@@ -14,9 +15,8 @@ frequency_table = {
     'Y' : 1.72, 'Z' : 0.11  
 }
 frequency_table = sorted(frequency_table, key=frequency_table.get, reverse=True)
-# single = [element[0] for element in single]
-print(single)
-print(frequency_table)
+# print(single)
+# print(frequency_table)
 
 
 words = re.findall(r'[a-z]+', text)
