@@ -6,7 +6,7 @@
 #include <arpa/inet.h>
 #include <netinet/tcp.h>
 // 每抓到数据包，pcap自动调用该回调函数
-// 编译命令：g++ -o sniffer sniffer.c -lpcap
+// 编译命令：g++ -o sniffer Sniffer.cpp -lpcap
 void print_hex(const u_char *data, size_t len){
     printf("0x00: ");
     for (size_t i = 0; i < len; i++){
@@ -21,7 +21,7 @@ void print_payload(const u_char *data, int len){
         unsigned char c = data[i];
         if (c >= 32 && c < 127) putchar(c);
         else if (c == '\n') putchar('\n');
-        else printf("\\x%02x", c);
+        // else printf("\\x%02x", c);
     }
     fflush(stdout);
 }
@@ -64,7 +64,7 @@ int main()
     bpf_u_int32 net;
 
     // 打开网卡会话，把eth3修改为自己的网卡（br‑xxxx）
-    handle = pcap_open_live("br-8a7f9d1619bc", BUFSIZ, 1, 1000, errbuf);
+    handle = pcap_open_live("br-a91f707f420b", BUFSIZ, 1, 1000, errbuf);
 
     // 编译BPF过滤表达式
     pcap_compile(handle, &fp, filter_exp, 0, net);
